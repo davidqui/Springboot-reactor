@@ -27,7 +27,57 @@ public class SpringBootReactorApplication implements CommandLineRunner{
 	@Override
 	public void run(String... args) throws Exception {
 		
-		ejemploFlatMap();		
+		ejemploCollectList();		
+		
+	}
+	
+	
+	public void ejemploCollectList( ) throws Exception {
+		List<Usuario> usuariosList = new ArrayList<>();
+		usuariosList.add(new Usuario("Andres", " Guzman"));
+		usuariosList.add(new Usuario("Pedro", " Fulano"));
+		usuariosList.add(new Usuario("Maria", " Mengano"));
+		usuariosList.add(new Usuario("Diego", " sultano"));
+		usuariosList.add(new Usuario("Juan", " Mengano"));
+		usuariosList.add(new Usuario("Bruce", " Lee"));
+		usuariosList.add(new Usuario("Bruce", " Willy"));
+		
+		Flux.fromIterable(usuariosList)
+		.collectList()
+			.subscribe(lista -> {
+				
+			lista.forEach(item -> log.info(item.toString()));
+			});
+	
+	}
+	
+	// Ejemplo toString
+	
+	public void ejemploToString( ) throws Exception {
+		List<Usuario> usuariosList = new ArrayList<>();
+		usuariosList.add(new Usuario("Andres", " Guzman"));
+		usuariosList.add(new Usuario("Pedro", " Fulano"));
+		usuariosList.add(new Usuario("Maria", " Mengano"));
+		usuariosList.add(new Usuario("Diego", " sultano"));
+		usuariosList.add(new Usuario("Juan", " Mengano"));
+		usuariosList.add(new Usuario("Bruce", " Lee"));
+		usuariosList.add(new Usuario("Bruce", " Willy"));
+		
+		Flux.fromIterable(usuariosList)
+		.map(usuario -> usuario.getNombre().toUpperCase().concat(" ").concat(usuario.getApellido().toUpperCase()))
+				.flatMap(nombre -> {
+					if(nombre.contains("bruce".toUpperCase())) {
+						return Mono.just(nombre);
+					}else {
+						return Mono.empty();
+					}
+						
+				})
+				.map(nombre -> {
+					return nombre.toLowerCase();
+				})
+				.subscribe(u -> log.info(u.toString()));
+					
 		
 	}
 	
