@@ -18,7 +18,7 @@ public class SpringBootReactorApplication implements CommandLineRunner{
 
 	@Override
 	public void run(String... args) throws Exception {
-		Flux<String> nombres = Flux.just("Andres", "Pedro","", "Diego", "Juan")
+		Flux<String> nombres = Flux.just("Andres", "Pedro","Maria", "Diego", "Juan")
 //				.doOnNext(System.out::println);
 				.doOnNext(e -> {
 					if(e.isEmpty()) {
@@ -31,7 +31,17 @@ public class SpringBootReactorApplication implements CommandLineRunner{
 		
 //		nombres.subscribe(log::info);
 		nombres.subscribe(e -> log.info(e),
-				error -> log.error(error.getMessage()));
+				error -> log.error(error.getMessage()),
+				
+				new Runnable() {
+					
+					@Override
+					public void run() {
+						log.info("Ha finalizado la ejecucion del observable con exito!");
+						
+					}
+				});
+					
 		
 	}
 
