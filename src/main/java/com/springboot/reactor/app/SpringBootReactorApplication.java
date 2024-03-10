@@ -23,16 +23,16 @@ public class SpringBootReactorApplication implements CommandLineRunner{
 				.doOnNext(e -> {
 					if(e.isEmpty()) {
 						throw new RuntimeException("Nombre no puede ser vacio");
-					}{
-
-					System.out.println(e);
 					}
+					System.out.println(e);					
+				})
+				.map(nombre -> {
+					return nombre.toUpperCase();
 				});
 		
-//		nombres.subscribe(log::info);
+
 		nombres.subscribe(e -> log.info(e),
-				error -> log.error(error.getMessage()),
-				
+				error -> log.error(error.getMessage()),				
 				new Runnable() {
 					
 					@Override
