@@ -2,6 +2,7 @@ package com.springboot.reactor.app;
 
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,10 +31,33 @@ public class SpringBootReactorApplication implements CommandLineRunner{
 	@Override
 	public void run(String... args) throws Exception {
 
-		ejemploZipWithRangos();
+		ejemploDelayElements();
 		
 	}
 
+	public void ejemploDelayElements(){
+		Flux<Integer> rangos = Flux.range(1, 12)
+				.delayElements(Duration.ofSeconds(1))
+				.doOnNext(i -> log.info(i.toString()));
+
+		rangos.blockLast();
+	}
+
+	/**
+	 * Ejemplo de retraso con Bloqueo
+	 */
+	public void ejemploInterval(){
+		Flux<Integer> rangos = Flux.range(1, 12);
+		Flux<Long> retraso = Flux.interval(Duration.ofSeconds(1));
+
+		rangos.zipWith(retraso, (re, ra) -> ra)
+				.doOnNext( i -> log.info(i.toString()))
+				.blockLast(); //Bloquea hasta el  ultimo elemento que se emite
+	}
+
+	/**
+	 * Ejemplo con zip y el operador range
+	 */
 	public void ejemploZipWithRangos(){
 		Flux<Integer> rangos = 	Flux.range(0, 4);
 		Flux.just(1, 2, 3, 4)
