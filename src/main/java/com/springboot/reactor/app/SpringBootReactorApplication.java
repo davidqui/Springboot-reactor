@@ -1,5 +1,7 @@
 package com.springboot.reactor.app;
 
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
@@ -34,8 +36,48 @@ public class SpringBootReactorApplication implements CommandLineRunner{
 	@Override
 	public void run(String... args) throws Exception {
 
-		ejemploIntervalDesdeCreate();
+		ejemploContraPresion();
 		
+	}
+
+	/**
+	 * ejemplo Manejando ContraPresion con el Subscriber emplementando sus metodos
+	 */
+	public void ejemploContraPresion(){
+		Flux.range(1, 10)
+				.log()
+				.subscribe(new Subscriber<Integer>() {
+
+					private  Subscription s;
+					private Integer limite = 5;
+					private Integer consumido = 0;
+					@Override
+					public void onSubscribe(Subscription s) {
+						this.s = s;
+						s.request(limite);
+					}
+
+					@Override
+					public void onNext(Integer t) {
+						log.info(t.toString());
+						consumido++;
+						if (consumido== limite){
+							consumido= 0;
+							s.request(limite);
+						}
+
+					}
+
+					@Override
+					public void onError(Throwable t) {
+
+					}
+
+					@Override
+					public void onComplete() {
+
+					}
+				});
 	}
 
 	public void ejemploIntervalDesdeCreate(){
