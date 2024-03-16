@@ -30,12 +30,39 @@ public class SpringBootReactorApplication implements CommandLineRunner{
 	@Override
 	public void run(String... args) throws Exception {
 
-		ejemploUsuarioComentariosFlatMap();
+		ejemploUsuarioComentariosZipWithForma2();
 		
+	}
+	/**
+	 *  Ejemplo combinando flujos con zipWith Forma 2
+	 */
+	public void ejemploUsuarioComentariosZipWithForma2() {
+		Mono<Usuario> usuarioMono = Mono.fromCallable(()
+				-> new Usuario("John", "Doe"));
+
+		Mono<Comentarios> comentariosUsuarioMono = Mono.fromCallable(() -> {
+			Comentarios comentarios = new Comentarios();
+			comentarios.addComentario("Hola pepe, que tal!");
+			comentarios.addComentario("Hola pepe, que tal!");
+			comentarios.addComentario("Mañana voy a la playa!");
+			comentarios.addComentario("Estoy tomomando el curso de spring con reator!");
+
+			return comentarios;
+		});
+
+		Mono<UsuarioComentarios> usuarioConComentarios = usuarioMono
+				.zipWith(comentariosUsuarioMono)
+				.map(tuple -> {
+					Usuario u = tuple.getT1();
+					Comentarios c = tuple.getT2();
+
+					return new UsuarioComentarios(u, c);
+		});
+		usuarioConComentarios.subscribe(uc -> log.info(uc.toString()));
 	}
 
 	/**
-	 * Emplo convinando flujos con zipWith
+	 *  Ejemplo combinando flujos con FlatMap y  zipWith
 	 */
 	public void ejemploUsuarioComentariosZipWith() {
 		Mono<Usuario> usuarioMono = Mono.fromCallable(()
