@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
 import org.springframework.boot.CommandLineRunner;
@@ -31,10 +32,33 @@ public class SpringBootReactorApplication implements CommandLineRunner{
 	@Override
 	public void run(String... args) throws Exception {
 
-		ejemploDelayElements();
+		ejemploIntervalInfinito();
 		
 	}
 
+	public void ejemploIntervalInfinito() throws InterruptedException {
+		CountDownLatch latch = new CountDownLatch(1);
+
+		Flux.interval(Duration.ofSeconds(1))
+				//.doOnTerminate(() -> latch.countDown())
+				.doOnTerminate(latch::countDown) // La misma manera pero abreviada
+				.flatMap(i ->{
+					if (i >= 5){
+						return Flux.error(new InterruptedException("Solo hasta 5!"));
+					}
+					return Flux.just(i);
+				})
+		.map(i -> "Holo " + i)
+				.retry(2)
+				.subscribe(s -> log.info(s), e -> log.error(e.getMessage()));
+
+		latch.await();
+	}
+
+	/**
+	 * Ejemplo con bloqueo usando un Thread.sleep() y de manera mas elegante blockLast()
+	 * @throws InterruptedException
+	 */
 	public void ejemploDelayElements() throws InterruptedException {
 		Flux<Integer> rangos = Flux.range(1, 12)
 				.delayElements(Duration.ofSeconds(1))
