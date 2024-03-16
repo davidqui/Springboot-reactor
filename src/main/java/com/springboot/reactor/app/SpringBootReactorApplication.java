@@ -35,12 +35,14 @@ public class SpringBootReactorApplication implements CommandLineRunner{
 		
 	}
 
-	public void ejemploDelayElements(){
+	public void ejemploDelayElements() throws InterruptedException {
 		Flux<Integer> rangos = Flux.range(1, 12)
 				.delayElements(Duration.ofSeconds(1))
 				.doOnNext(i -> log.info(i.toString()));
 
-		rangos.blockLast();
+		rangos.subscribe();
+
+		Thread.sleep(13000);
 	}
 
 	/**
