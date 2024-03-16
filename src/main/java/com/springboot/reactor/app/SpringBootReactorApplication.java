@@ -9,8 +9,11 @@ import org.slf4j.Logger;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.objenesis.instantiator.basic.NewInstanceInstantiator;
 
+import com.springboot.reactor.app.model.Comentarios;
 import com.springboot.reactor.app.model.Usuario;
+import com.springboot.reactor.app.model.UsuarioComentarios;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -26,11 +29,53 @@ public class SpringBootReactorApplication implements CommandLineRunner{
 
 	@Override
 	public void run(String... args) throws Exception {
-		
-		ejemploCollectList();		
+
+		ejemploUsuarioComentariosFlatMap();
 		
 	}
-	
+
+	/**
+	 * Emplo convinando flujos con zipWith
+	 */
+	public void ejemploUsuarioComentariosZipWith() {
+		Mono<Usuario> usuarioMono = Mono.fromCallable(()
+				-> new Usuario("John", "Doe"));
+
+		Mono<Comentarios> comentariosUsuarioMono = Mono.fromCallable(() -> {
+			Comentarios comentarios = new Comentarios();
+			comentarios.addComentario("Hola pepe, que tal!");
+			comentarios.addComentario("Hola pepe, que tal!");
+			comentarios.addComentario("Mañana voy a la playa!");
+			comentarios.addComentario("Estoy tomomando el curso de spring con reator!");
+
+			return comentarios;
+		});
+
+		Mono<UsuarioComentarios> usuarioComentariosMonoConComentarios = usuarioMono
+				.zipWith(comentariosUsuarioMono, ((usuario, comentariosUsuarios) -> new UsuarioComentarios(usuario, comentariosUsuarios)));
+		usuarioComentariosMonoConComentarios.subscribe(uc -> log.info(uc.toString()));
+	}
+
+	/**
+	 * Ejemplo Usuario Comentario con Flatmap
+	 */
+		public void ejemploUsuarioComentariosFlatMap() {
+		Mono<Usuario> usuarioMono = Mono.fromCallable(()
+				-> new Usuario("John", "Doe"));
+		
+		Mono<Comentarios> comentariosUsuarioMono = Mono.fromCallable(() -> {
+			Comentarios comentarios = new Comentarios();
+			comentarios.addComentario("Hola pepe, que tal!");
+			comentarios.addComentario("Hola pepe, que tal!");
+			comentarios.addComentario("Mañana voy a la playa!");
+			comentarios.addComentario("Estoy tomomando el curso de spring con reator!");
+			
+			return comentarios;
+		});
+
+			Mono<UsuarioComentarios> usuarioComentariosMonoConComentarios = usuarioMono.flatMap(u -> comentariosUsuarioMono.map(c -> new UsuarioComentarios(u, c) ));
+			usuarioComentariosMonoConComentarios.subscribe(uc -> log.info(uc.toString()));
+	}
 	
 	public void ejemploCollectList( ) throws Exception {
 		List<Usuario> usuariosList = new ArrayList<>();
